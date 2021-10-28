@@ -34,6 +34,7 @@ import WorkflowList from "components/Workflow/WorkflowList.vue";
 import CollectionEditView from "components/Collections/common/CollectionEditView.vue";
 import HistoryImport from "components/HistoryImport.vue";
 import { HistoryExport } from "components/HistoryExport/index";
+import { FavoriteExtensions } from "components/User/FavoriteExtensions/index";
 import HistoryView from "components/HistoryView.vue";
 import WorkflowInvocationReport from "components/Workflow/InvocationReport.vue";
 import WorkflowRun from "components/Workflow/Run/WorkflowRun.vue";
@@ -70,6 +71,7 @@ export const getAnalysisRouter = (Galaxy) => {
             "(/)user(/)cloud_auth": "show_cloud_auth",
             "(/)user(/)external_ids": "show_external_ids",
             "(/)user(/)(:form_id)": "show_user_form",
+            "(/)user(/)favorite(/)extensions": "show_user_favorite_extensions",
             "(/)welcome(/)new": "mountWelcome",
             "(/)pages(/)create(/)": "show_pages_create",
             "(/)pages(/)edit(/)": "show_pages_edit",
@@ -155,6 +157,10 @@ export const getAnalysisRouter = (Galaxy) => {
         show_user_form: function (form_id, params) {
             const model = getUserPreferencesModel(params.id);
             this._display_vue_helper(FormGeneric, _.extend(model[form_id], { active_tab: "user" }));
+        },
+
+        show_user_favorite_extensions: function () {
+            this._display_vue_helper(FavoriteExtensions, {});
         },
 
         show_interactivetool_list: function () {
