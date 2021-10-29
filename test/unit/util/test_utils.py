@@ -78,3 +78,9 @@ def test_clean_multiline_string():
         c
 """)
     assert x == "a\nb\nc\n"
+
+def test_str_as_bool():
+    for value in ('true', 'yes', 'on', '1', 'True', 'Yes', 'On','TRUE', 'YES', 'ON'):
+        assert util.str_as_bool(value)
+    for value in ('false', '0', 'something else'):
+        assert not util.str_as_bool(value)

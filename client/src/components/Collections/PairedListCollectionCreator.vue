@@ -100,7 +100,7 @@
                 </div>
                 <collection-creator
                     :oncancel="oncancel"
-                    :hide-source-items="hideSourceItems"
+                    :hide-source-items="!hideSourceItems"
                     @onUpdateHideSourceItems="onUpdateHideSourceItems"
                     @clicked-create="clickedCreate"
                     @remove-extensions-toggle="removeExtensionsToggle"

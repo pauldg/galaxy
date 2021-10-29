@@ -123,6 +123,7 @@ class DatasetsController(BaseGalaxyAPIController, UsesVisualizationMixin):
         contents = self.history_contents_manager.contents(
             container=container, filters=filters, limit=limit, offset=offset, order_by=order_by, user_id=trans.user.id,
         )
+
         if str_as_bool(trans.app.config.get('show_datasets', 'True')):
             return [self.serializer_by_type[content.history_content_type].serialize_to_view(content, user=trans.user, trans=trans, view=view) for content in contents]
         else:
