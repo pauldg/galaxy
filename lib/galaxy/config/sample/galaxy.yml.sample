@@ -50,7 +50,7 @@ gravity:
     # enable: true
 
     # The socket to bind. A string of the form: ``HOST``, ``HOST:PORT``, ``unix:PATH``, ``fd://FD``. An IP is a valid HOST.
-    # bind: localhost:8080
+    bind: 0.0.0.0:8080
 
     # Controls the number of Galaxy application processes Gunicorn will spawn.
     # Increased web performance can be attained by increasing this value.
@@ -817,7 +817,7 @@ galaxy:
   # it overrides any other objectstore settings.
   # The value of this option will be resolved with respect to
   # <config_dir>.
-  #object_store_config_file: object_store_conf.xml
+  object_store_config_file: object_store_conf.xml
 
   # What Dataset attribute is used to reference files in an ObjectStore
   # implementation, this can be 'uuid' or 'id'. The default will depend
@@ -1690,7 +1690,7 @@ galaxy:
   # Admin section of the server, and will have access to create users,
   # groups, roles, libraries, and more.  For more information, see:
   # https://galaxyproject.org/admin/
-  #admin_users: null
+  admin_users: paul.degeest@psb.ugent.be
 
   # Force everyone to log in (disable anonymous access).
   #require_login: false
@@ -2174,7 +2174,7 @@ galaxy:
   # completion.  These bits include the job working directory, external
   # metadata temporary files, and DRM stdout and stderr files (if using
   # a DRM).  Possible values are: always, onsuccess, never
-  #cleanup_job: always
+  cleanup_job: never
 
   # When running DRMAA jobs as the Galaxy user
   # (https://docs.galaxyproject.org/en/master/admin/cluster.html#submitting-jobs-as-the-real-user)

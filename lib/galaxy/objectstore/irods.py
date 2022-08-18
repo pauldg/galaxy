@@ -66,6 +66,10 @@ def parse_config_xml(config_xml):
             _config_xml_error("zone")
         zone_name = z_xml[0].get("name")
 
+        # custom load environment
+        env_xml = config_xml.findall("environment")
+        envfile = env_xml[0].get("envfile", None)
+
         c_xml = config_xml.findall("connection")
         if not c_xml:
             _config_xml_error("connection")
@@ -90,6 +94,7 @@ def parse_config_xml(config_xml):
             "auth": {
                 "username": username,
                 "password": password,
+                "envfile": envfile,
             },
             "resource": {
                 "name": resource_name,
@@ -163,6 +168,10 @@ class IRODSObjectStore(DiskObjectStore, CloudConfigMixin):
         self.password = auth_dict.get("password")
         if self.password is None:
             _config_dict_error("auth->password")
+        # padge
+        self.envfile = auth_dict.get("envfile")
+        if self.envfile is None:
+            _config_dict_error("auth->envfile")
 
         resource_dict = config_dict["resource"]
         if resource_dict is None:
@@ -217,14 +226,20 @@ class IRODSObjectStore(DiskObjectStore, CloudConfigMixin):
         if irods is None:
             raise Exception(IRODS_IMPORT_MESSAGE)
 
-        self.session = iRODSSession(
-            host=self.host,
-            port=self.port,
-            user=self.username,
-            password=self.password,
-            zone=self.zone,
-            refresh_time=self.refresh_time,
-        )
+        #padge
+        self.session =  iRODSSession(
+            irods_env_file=self.envfile, 
+            password=self.password
+            )
+
+        # self.session = iRODSSession(
+        #     host=self.host,
+        #     port=self.port,
+        #     user=self.username,
+        #     password=self.password,
+        #     zone=self.zone,
+        #     refresh_time=self.refresh_time,
+        # )
         # Set connection timeout
         self.session.connection_timeout = self.timeout
         log.debug("irods_pt __init__: %s", ipt_timer)

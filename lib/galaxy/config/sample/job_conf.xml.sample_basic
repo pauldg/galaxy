@@ -8,4 +8,22 @@
     <destinations>
         <destination id="local" runner="local"/>
     </destinations>
+    <limits>
+        <!-- Certain limits can be defined. The 'concurrent_jobs' limits all
+             control the number of jobs that can be "active" at a time, that
+             is, dispatched to a runner and in the 'queued' or 'running'
+             states.
+
+             A race condition exists that will allow destination_* concurrency
+             limits to be surpassed when multiple handlers are allowed to
+             handle jobs for the same destination. To prevent this, assign all
+             jobs for a specific destination to a single handler.
+        -->
+        <!-- registered_user_concurrent_jobs:
+                Limit on the number of jobs a user with a registered Galaxy
+                account can have active across all destinations.
+        -->
+        <limit type="registered_user_concurrent_jobs">100</limit>
+        <limit type="output_size">10GB</limit>
+    </limits>
 </job_conf>

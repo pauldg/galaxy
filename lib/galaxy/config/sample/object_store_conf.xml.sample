@@ -15,11 +15,13 @@
     configuration file. The default uses the values of file_path, new_file_path,
     and job_working_directory in galaxy.yml).
 -->
-<object_store type="disk" store_by="uuid">
+
+<!-- <object_store type="disk" store_by="uuid">
     <files_dir path="database/objects"/>
     <extra_dir type="temp" path="database/tmp"/>
     <extra_dir type="job_work" path="database/jobs_directory"/>
-</object_store>
+</object_store>  -->
+
 
 <!--
     Sample Hierarchical Object Store with disk backends
@@ -29,22 +31,27 @@
     tag, until the dataset is found. New datasets are always created in the
     first (order="0") backend.
 -->
-<!--
+<!-- 
 <object_store type="hierarchical">
     <backends>
-        <backend id="new" type="disk" order="0">
-            <files_dir path="/new-fs/galaxy/files"/>
-            <extra_dir type="temp" path="/new-fs/galaxy/tmp"/>
-            <extra_dir type="job_work" path="/new-fs/galaxy/jobs"/>
+        <backend id="standard" type="disk" order="0">
+            <files_dir path="/fs/galaxy/files"/>
+            <extra_dir type="temp" path="database/fs/tmp"/>
+            <extra_dir type="job_work" path="database/fs/job_working_directory"/>
         </backend>
-        <backend id="old" type="disk" order="1">
-            <files_dir path="/old-fs/galaxy/files"/>
-            <extra_dir type="temp" path="/old-fs/galaxy/tmp"/>
-            <extra_dir type="job_work" path="/old-fs/galaxy/jobs"/>
+        <backend type="irods" id="irods_OS" order="1">
+            <auth username="public" password="rods" />
+            <resource name="default" />
+            <zone name="kuleuven_tier1_pilot" />
+            <connection host="irods.hpc.kuleuven.be" port="1247" timeout="60"/>
+            <environment envfile="/home/padge/Downloads/Elixir/galaxy/config/irods_environment.json"/>
+            <cache path="database/object_store_cache_irods" size="10000" />
+            <extra_dir type="temp" path="database/irods/tmp_irods"/>
+            <extra_dir type="job_work" path="database/irods/job_working_directory_irods"/>
         </backend>
     </backends>
 </object_store>
--->
+ -->
 
 <!--
     Sample Distributed Object Store with disk backends
@@ -144,17 +151,29 @@
 <!--
     Sample iRODS Object Store
 -->
-<!--
+<!-- 
 <object_store type="irods">
     <auth username="rods" password="rods" />
     <resource name="demoResc" />
     <zone name="tempZone" />
     <connection host="localhost" port="1247" timeout="30" refresh_time="300"/>
-    <cache path="database/object_store_cache_irods" size="1000" />
+    <cache path="database/object_store_cache_irods" size="500" />
+    <extra_dir type="job_work" path="database/job_working_directory_irods"/>
+    <extra_dir type="temp" path="database/tmp_irods"/>
+</object_store> -->
+
+    <!-- <auth username="public" password="rods" /> -->
+
+<object_store type="irods" id="irods_OS" order="1">
+    <auth username="vsc44192" password="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjA4MjU3NDAsImlzcyI6InRpZXIyLXAtbG9naW4tMiIsInN1YiI6InZzYzQ0MTkyIn0.oJ5jYDuIDYXoZE_S7OfX_kIZ-qyloPvI1oeMV9JJUTs" />
+    <resource name="default" />
+    <zone name="kuleuven_tier1_pilot" />
+    <connection host="irods.hpc.kuleuven.be" port="1247" timeout="60"/>
+    <environment envfile="/home/ubuntu/galaxy/config/irods_environment.json"/>
+    <cache path="database/object_store_cache_irods" size="5" />
     <extra_dir type="job_work" path="database/job_working_directory_irods"/>
     <extra_dir type="temp" path="database/tmp_irods"/>
 </object_store>
--->
 
 <!--
     Sample Swift Object Store
