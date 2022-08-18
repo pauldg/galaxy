@@ -27,7 +27,6 @@ HasFindElement = Union[WebDriver, WebElement]
 
 
 class HasDriver:
-    TimeoutException: Type[SeleniumTimeoutException] = SeleniumTimeoutException
     by: Type[By] = By
     keys: Type[Keys] = Keys
     driver: WebDriver
@@ -55,6 +54,12 @@ class HasDriver:
         elements = self.find_elements(selector_template)
         for element in elements:
             assert not element.is_displayed()
+
+    def assert_disabled(self, selector_template: Target):
+        elements = self.find_elements(selector_template)
+        assert len(elements) > 0
+        for element in elements:
+            assert not element.is_enabled()
 
     def selector_is_displayed(self, selector: str):
         element = self.driver.find_element(By.CSS_SELECTOR, selector)
@@ -290,13 +295,10 @@ def exception_indicates_stale_element(exception):
     return "stale" in str(exception)
 
 
-TimeoutException = SeleniumTimeoutException
-
-
 __all__ = (
     "exception_indicates_click_intercepted",
     "exception_indicates_not_clickable",
     "exception_indicates_stale_element",
     "HasDriver",
-    "TimeoutException",
+    "SeleniumTimeoutException",
 )

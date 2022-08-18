@@ -4,7 +4,6 @@ VENV?=.venv
 IN_VENV=if [ -f "$(VENV)/bin/activate" ]; then . "$(VENV)/bin/activate"; fi;
 RELEASE_CURR:=22.09
 RELEASE_UPSTREAM:=upstream
-TARGET_BRANCH=$(RELEASE_UPSTREAM)/dev
 CONFIG_MANAGE=$(IN_VENV) python lib/galaxy/config/config_manage.py
 PROJECT_URL?=https://github.com/galaxyproject/galaxy
 DOCS_DIR=doc
@@ -161,6 +160,9 @@ clean-cwl-conformance-tests:  ## Clean CWL conformance tests
 update-cwl-conformance-tests: ## update CWL conformance tests
 	$(MAKE) clean-cwl-conformance-tests
 	$(MAKE) generate-cwl-conformance-tests
+
+skip-client: ## Run only the server, skipping the client build.
+	GALAXY_SKIP_CLIENT_BUILD=1 sh run.sh
 
 node-deps: ## Install NodeJS dependencies.
 ifndef YARN
