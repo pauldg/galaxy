@@ -7,6 +7,7 @@ import { computed } from "vue";
 import { useConfig } from "@/composables/config";
 import { getAppRoot } from "@/onload/loadConfig";
 
+import TrainingComponent from "./Workshop/TrainingComponent.vue";
 import Heading from "@/components/Common/Heading.vue";
 import ExternalLink from "@/components/ExternalLink.vue";
 import License from "@/components/License/License.vue";
@@ -70,6 +71,7 @@ const versionUserDocumentationUrl = computed(() => {
                 <ExternalLink :href="config.terms_url">Review them here.</ExternalLink>
             </p>
         </div>
+        <TrainingComponent></TrainingComponent>
     </div>
 </template>
 
