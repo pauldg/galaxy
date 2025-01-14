@@ -153,3 +153,24 @@ preferences:
               type: boolean
               required: False
               value: False
+
+    # Used in file_sources_conf.yml
+    irods:
+        description: Your iRODS account
+        inputs:
+            - name: host
+              label: The irods host url
+              type: text
+              required: False
+            - name: zone
+              label: Zone defined on the irods
+              type: text
+              required: False
+            - name: username
+              label: Username
+              type: text
+              required: False
+            - name: password
+              label: Password
+              type: password
+              required: False

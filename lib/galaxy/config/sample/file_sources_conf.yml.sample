@@ -238,3 +238,12 @@
   access_token: ${user.preferences['onedata|access_token']}
   onezone_domain: ${user.preferences['onedata|onezone_domain']}
   disable_tls_certificate_validation: ${user.preferences['onedata|disable_tls_certificate_validation']}
+
+- type: irods
+  id: irods
+  label: iRODS
+  doc: Your iRODS files - configure an access token via user preferences
+  host: ${user.preferences['irods|host']}
+  zone: ${user.preferences['irods|zone']}
+  username: ${user.preferences['irods|username']}
+  password: ${user.preferences['irods|password']}
