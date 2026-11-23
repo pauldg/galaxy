@@ -88,6 +88,7 @@ class ToolShedAppConfigurationAttributes:
     sentry_dsn: str | None
     sentry_event_level: str
     sentry_traces_sample_rate: float
+    sentry_scrub_personal_data: bool
     sentry_ca_certs: str | None
     session_duration: int
     terms_url: str | None

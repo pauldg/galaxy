@@ -760,6 +760,22 @@ mapping:
           will have that percentage chance of being sent to Sentry. A value higher than 0
           is required to analyze performance.
 
+      sentry_scrub_personal_data:
+        type: bool
+        default: false
+        required: false
+        desc: |
+          Remove personal data from Sentry events before they are sent. When
+          enabled, Galaxy drops user details, cookies, request bodies, the
+          client address and stack frame variables from each event, and keeps
+          only the template of log messages, not the values passed to them. It
+          masks e-mail addresses, IP addresses, API keys, tokens and session
+          cookies in messages, exceptions and breadcrumbs. Usernames and ids in
+          free text cannot be recognised and are sent as they are.
+          Browser-side error reporting is turned off, as browsers connect to
+          the Sentry server directly and so share the user's IP address with
+          it.
+
       sentry_ca_certs:
         type: str
         required: False

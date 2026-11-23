@@ -704,6 +704,7 @@ class CommonConfigurationMixin:
     """Shared configuration settings code for Galaxy and ToolShed."""
 
     sentry_dsn: str | None
+    sentry_scrub_personal_data: bool
     config_dict: dict[str, str]
 
     @property
@@ -723,9 +724,11 @@ class CommonConfigurationMixin:
     def sentry_dsn_public(self):
         """
         Sentry URL with private key removed for use in client side scripts,
-        sentry server will need to be configured to accept events
+        sentry server will need to be configured to accept events.
+        Not set when personal data is scrubbed, as browsers would send the
+        user's IP address to the Sentry server directly.
         """
-        if self.sentry_dsn:
+        if self.sentry_dsn and not self.sentry_scrub_personal_data:
             return re.sub(r"^([^:/?#]+:)?//(\w+):(\w+)", r"\1//\2", self.sentry_dsn)
 
     def get_bool(self, key, default):

@@ -1,4 +1,5 @@
 import collections
+import inspect
 import logging
 import os
 import signal
@@ -200,6 +201,11 @@ from galaxy.util import (
     listify,
     StructuredExecutionTimer,
 )
+from galaxy.util.sentry import (
+    scrub_event,
+    scrub_options,
+    scrub_string,
+)
 from galaxy.util.task import IntervalTask
 from galaxy.util.tool_shed import tool_shed_registry
 from galaxy.visualization.data_providers.registry import DataProviderRegistry
@@ -275,6 +281,7 @@ class SentryClientMixin:
             ], f"Invalid sentry event level '{self.config.sentry.event_level}'"
 
             import sentry_sdk
+            import sentry_sdk.consts
             from sentry_sdk.integrations import (
                 DidNotEnable,
                 Integration,
@@ -314,7 +321,13 @@ class SentryClientMixin:
                 else:
                     integrations.append(MCPIntegration())
 
+            scrub_personal_data = self.config.sentry_scrub_personal_data
+            # Applied to values taken from the raw exception after the event was scrubbed.
+            clean = scrub_string if scrub_personal_data else str
+
             def before_send(event, hint):
+                if scrub_personal_data:
+                    scrub_event(event)
                 if "exc_info" in hint:
                     exc_type, exc_value, tb = hint["exc_info"]
                     if isinstance(exc_value, ToolTemplatingException):
@@ -325,9 +338,9 @@ class SentryClientMixin:
                         # If we don't do this issues are never properly grouped since by default the calling stack is inspected,
                         # and that is always unique in cheetah as it is dynamically generated.
                         event["fingerprint"] = [
-                            str(exc_value),
+                            clean(str(exc_value)),
                             str(exc_value.tool_version),
-                            str(exc_value.__cause__),
+                            clean(str(exc_value.__cause__)),
                         ]
                         event.setdefault("tags", {}).update(
                             {
@@ -337,6 +350,14 @@ class SentryClientMixin:
                             }
                         )
                 return event
+
+            def scrub_item(item, hint):
+                return scrub_event(item)
+
+            privacy_options: dict[str, Any] = {}
+            if scrub_personal_data:
+                supported = inspect.signature(sentry_sdk.consts.ClientConstructor.__init__).parameters
+                privacy_options = scrub_options(supported, scrub_item)
 
             self.sentry_client = sentry_sdk.init(
                 self.config.sentry_dsn,
@@ -348,6 +369,7 @@ class SentryClientMixin:
                 traces_sample_rate=self.config.sentry_traces_sample_rate,
                 ca_certs=self.config.sentry_ca_certs,
                 before_send=before_send,
+                **privacy_options,
             )
 
 

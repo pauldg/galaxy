@@ -277,6 +277,7 @@ class GalaxyAppConfigurationAttributes:
     sentry_event_level: str
     sentry_traces_sample_rate: float
     sentry_client_traces_sample_rate: float
+    sentry_scrub_personal_data: bool
     sentry_ca_certs: str | None
     enable_statsd_middleware: bool
     statsd_host: str | None
