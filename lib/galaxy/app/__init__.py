@@ -351,13 +351,10 @@ class SentryClientMixin:
                         )
                 return event
 
-            def scrub_item(item, hint):
-                return scrub_event(item)
-
             privacy_options: dict[str, Any] = {}
             if scrub_personal_data:
                 supported = inspect.signature(sentry_sdk.consts.ClientConstructor.__init__).parameters
-                privacy_options = scrub_options(supported, scrub_item)
+                privacy_options = scrub_options(supported, scrub_event)
 
             self.sentry_client = sentry_sdk.init(
                 self.config.sentry_dsn,

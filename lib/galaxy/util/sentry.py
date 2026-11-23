@@ -123,13 +123,15 @@ def _drop_log_parameters(event: dict[str, Any]) -> None:
                 del attributes[name]
 
 
-def scrub_event(event: dict[str, Any]) -> dict[str, Any]:
+def scrub_event(event: dict[str, Any], hint: dict[str, Any] | None = None) -> dict[str, Any]:
     """Remove user details and personal data from a Sentry event.
 
-    Drops the user block, cookies, request bodies, the client address, Celery task
-    arguments and the values passed to log calls, and masks e-mail addresses, IP addresses, API keys, tokens and
-    session cookies in every string of the event, dictionary keys included. The
-    event's top-level values are replaced, and the event is returned.
+    Drops the user block, cookies, request bodies, the client address, Celery
+    task arguments and the values passed to log calls. Masks e-mail addresses,
+    IP addresses, API keys, tokens and session cookies in every string of the
+    event, dictionary keys included. The event's top-level values are replaced,
+    and the event is returned. Takes Sentry's hook arguments, so it can be
+    registered for transactions, spans, logs and metrics directly.
     """
     event.pop("user", None)
     request = event.get("request")
