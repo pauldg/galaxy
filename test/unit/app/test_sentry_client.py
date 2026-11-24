@@ -95,8 +95,7 @@ def check_user_lookup():
 def send_events():
     sentry_sdk.set_user({"id": str(USER_ID), "email": EMAIL, "username": USERNAME, "ip_address": IPV4})
     log.info("%s - GET /api/users/current?key=%s", IPV4, API_KEY)
-    # A bare secret passed to a log call has nothing that marks it as one.
-    log.info("Rejected API key %s for %s", BEARER, USERNAME)
+    log.info("Authorization: Bearer %s", BEARER)
     log.error("Login failed for %s from %s", EMAIL, IPV6)
     try:
         check_user_lookup()
@@ -115,11 +114,22 @@ def test_scrubbed_events_carry_no_personal_data(capture_events):
             assert value not in serialized
     # sentry-sdk 3 also sends log records as separate items.
     assert not any(value in json.dumps(transport.items) for value in (EMAIL, API_KEY, BEARER, USERNAME))
-    assert transport.events[0]["logentry"]["message"] == "Login failed for %s from %s"
-    assert "params" not in transport.events[0]["logentry"]
+    logentry = transport.events[0]["logentry"]
+    assert logentry["message"] == "Login failed for %s from %s"
+    assert list(logentry["params"]) == ["[email]", "[ip]"]
     frames = transport.events[1]["exception"]["values"][0]["stacktrace"]["frames"]
     assert frames[-1]["function"] == "check_user_lookup"
     assert not any(frame.get("vars") for frame in frames)
+
+
+def test_bare_values_in_log_arguments_are_sent(capture_events):
+    # A bare secret or username passed to a log call has nothing that marks it as one.
+    transport = capture_events(scrub=True)
+    log.info("Rejected API key %s for %s", BEARER, USERNAME)
+    log.error("Login failed")
+    serialized = json.dumps(transport.events[0])
+    assert BEARER in serialized
+    assert USERNAME in serialized
 
 
 def test_scrubbed_tool_templating_fingerprint(capture_events):

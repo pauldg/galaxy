@@ -160,38 +160,58 @@ def test_scrub_options_for_sentry_sdk_3():
     assert data_collection["queues"] is False
 
 
-def test_scrub_event_keeps_only_log_templates():
+class _User:
+    def __str__(self):
+        return "User(jane@example.org)"
+
+
+def test_scrub_event_scrubs_log_arguments():
     event: dict[str, Any] = {
         "logentry": {
-            "message": "Rejected API key %s for %s",
-            "params": ["0123abcd", "jane@example.org"],
-            "formatted": "Rejected API key 0123abcd for jane@example.org",
+            "message": "Login failed for %s from %s with key=%s",
+            "params": (_User(), "203.0.113.7", "0123abcd"),
+            "formatted": "Login failed for User(jane@example.org) from 203.0.113.7 with key=0123abcd",
         }
     }
     scrub_event(event)
-    assert event["logentry"] == {"message": "Rejected API key %s for %s"}
+    assert event["logentry"] == {
+        "message": "Login failed for %s from %s with key=%s",
+        "params": ["User([email])", "[ip]", "0123abcd"],
+        "formatted": "Login failed for User([email]) from [ip] with key=[Filtered]",
+    }
 
 
-def test_scrub_event_keeps_only_log_templates_in_log_items():
+def test_scrub_event_scrubs_named_log_arguments():
+    event: dict[str, Any] = {"logentry": {"message": "Login failed for %(user)s", "params": {"user": _User()}}}
+    scrub_event(event)
+    assert event["logentry"]["params"] == {"user": "User([email])"}
+
+
+def test_scrub_event_scrubs_log_arguments_in_log_items():
     # sentry-sdk 3 sends log records as separate items.
     item: dict[str, Any] = {
-        "body": "Rejected API key 0123abcd for jane@example.org",
+        "body": "Login failed for jane@example.org from 203.0.113.7",
         "attributes": {
-            "sentry.message.template": "Rejected API key %s for %s",
-            "sentry.message.parameter.0": "0123abcd",
-            "sentry.message.parameter.1": "jane@example.org",
+            "sentry.message.template": "Login failed for %s from %s",
+            "sentry.message.parameter.0": "jane@example.org",
+            "sentry.message.parameter.1": "203.0.113.7",
             "logger.name": "galaxy.auth",
         },
     }
     scrub_event(item)
-    assert item["body"] == "Rejected API key %s for %s"
-    assert item["attributes"] == {"sentry.message.template": "Rejected API key %s for %s", "logger.name": "galaxy.auth"}
+    assert item["body"] == "Login failed for [email] from [ip]"
+    assert item["attributes"] == {
+        "sentry.message.template": "Login failed for %s from %s",
+        "sentry.message.parameter.0": "[email]",
+        "sentry.message.parameter.1": "[ip]",
+        "logger.name": "galaxy.auth",
+    }
 
 
-def test_scrub_breadcrumb_keeps_only_log_templates():
-    record = logging.LogRecord("galaxy.auth", logging.INFO, __file__, 1, "Rejected API key %s", ("0123abcd",), None)
+def test_scrub_breadcrumb_scrubs_log_messages():
+    record = logging.LogRecord("galaxy.auth", logging.INFO, __file__, 1, "Login by %s", ("jane@example.org",), None)
     crumb = scrub_breadcrumb({"message": record.getMessage(), "category": "galaxy.auth"}, {"log_record": record})
-    assert crumb == {"message": "Rejected API key %s", "category": "galaxy.auth"}
+    assert crumb == {"message": "Login by [email]", "category": "galaxy.auth"}
     crumb = scrub_breadcrumb({"message": "GET /api?key=0123abcd from 203.0.113.7"}, {})
     assert crumb == {"message": "GET /api?key=[Filtered] from [ip]"}
 

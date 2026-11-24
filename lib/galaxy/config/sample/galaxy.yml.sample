@@ -2070,14 +2070,13 @@ galaxy:
 
   # Remove personal data from Sentry events before they are sent. When
   # enabled, Galaxy drops user details, cookies, request bodies, the
-  # client address and stack frame variables from each event, and keeps
-  # only the template of log messages, not the values passed to them. It
-  # masks e-mail addresses, IP addresses, API keys, tokens and session
-  # cookies in messages, exceptions and breadcrumbs. Usernames and ids
-  # in free text cannot be recognised and are sent as they are.
-  # Browser-side error reporting is turned off, as browsers connect to
-  # the Sentry server directly and so share the user's IP address with
-  # it.
+  # client address and stack frame variables from each event. It masks
+  # e-mail addresses, IP addresses, API keys, tokens and session cookies
+  # in messages, log message arguments, exceptions and breadcrumbs.
+  # Usernames and ids in free text cannot be recognised and are sent as
+  # they are. Browser-side error reporting is turned off, as browsers
+  # connect to the Sentry server directly and so share the user's IP
+  # address with it.
   #sentry_scrub_personal_data: false
 
   # Use this option to provide the path to location of the CA
