@@ -725,10 +725,12 @@ class PurgeDeletedUsers(PurgesHDAs, RemovesMetadataFiles, Action):
 class PurgeDeletedUsersGDPR(PurgesHDAs, RemovesMetadataFiles, Action):
     """
     - Perform all steps in the PurgeDeletedUsers/purge_deleted_users action
-    - Obfuscate User.email and User.username for all users purged in this step.
+    - Obfuscate User.email and User.username for all users purged in this step, with the same hash
+      as UserManager.purge: sha512 of the value salted with the epoch time of this action.
     - Clear User.display_name for all users purged in this step.
-    - Obfuscate the email in the name and description of the private Role of all users purged in
-      this step (private roles created before 24.2 are named after the user's email).
+    - Set the name and description of the private Role of all users purged in this step to the
+      email hash, as UserManager.purge does (private roles created before 24.2 are named after the
+      user's email).
     - Delete all OIDC user authnz tokens (external identity associations) whose user_ids are purged
       in this step.
     - Delete the extra user preferences of all users purged in this step. Values kept in the vault
@@ -739,9 +741,8 @@ class PurgeDeletedUsersGDPR(PurgesHDAs, RemovesMetadataFiles, Action):
         WITH users_to_purge
           AS MATERIALIZED (
                    SELECT id,
-                          email,
-                          encode(sha256(convert_to(email || gen_random_uuid()::text, 'UTF8')), 'hex') AS email_hash,
-                          encode(sha256(convert_to(username || gen_random_uuid()::text, 'UTF8')), 'hex') AS username_hash
+                          encode(sha512(convert_to(email || '{epoch_time}', 'UTF8')), 'hex') AS email_hash,
+                          encode(sha512(convert_to(username || '{epoch_time}', 'UTF8')), 'hex') AS username_hash
                      FROM galaxy_user
                     WHERE deleted{force_retry_sql}
                           AND update_time < (NOW() AT TIME ZONE 'utc' - (:days * interval '1 day'))),
@@ -757,8 +758,8 @@ class PurgeDeletedUsersGDPR(PurgesHDAs, RemovesMetadataFiles, Action):
                 RETURNING galaxy_user.id AS id),
              redacted_private_role_ids
           AS (     UPDATE role
-                      SET name = replace(role.name, users_to_purge.email, users_to_purge.email_hash),
-                          description = replace(role.description, users_to_purge.email, users_to_purge.email_hash)
+                      SET name = users_to_purge.email_hash,
+                          description = 'Private Role for ' || users_to_purge.email_hash
                      FROM users_to_purge, user_role_association
                     WHERE user_role_association.user_id = users_to_purge.id
                           AND user_role_association.role_id = role.id
